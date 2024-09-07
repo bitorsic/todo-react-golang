@@ -5,12 +5,15 @@ import (
 	"golang-backend/routes"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	godotenv.Load()
+	config.DBConnect()
+
 	app := fiber.New()
 
-	config.DBConnect()
 	routes.Setup(app)
 
 	app.Listen(":3000")

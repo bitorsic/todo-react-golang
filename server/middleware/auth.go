@@ -18,9 +18,11 @@ func VerifyJWT(c *fiber.Ctx) error {
 
 	authHeader := strings.Split(c.Get("Authorization"), " ")[1]
 
-	token, err := jwt.ParseWithClaims(authHeader, &jwt.MapClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte(os.Getenv("LOGIN_KEY")), nil
-	})
+	token, err := jwt.ParseWithClaims(authHeader, &jwt.MapClaims{},
+		func(token *jwt.Token) (interface{}, error) {
+			return []byte(os.Getenv("LOGIN_KEY")), nil
+		},
+	)
 	if err != nil {
 		return c.Status(401).JSON(fiber.Map{
 			"success": false,
