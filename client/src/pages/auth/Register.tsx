@@ -1,5 +1,5 @@
 import React, { useState } from "react"
-import apiClient from "../config/axiosConfig";
+import apiClient from "../../config/axiosConfig";
 
 interface FormData {
 	email: string;
