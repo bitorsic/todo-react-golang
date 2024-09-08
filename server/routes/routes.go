@@ -3,6 +3,7 @@ package routes
 import (
 	"golang-backend/controllers"
 	"golang-backend/middleware"
+	"os"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -11,12 +12,18 @@ import (
 
 func Setup(app *fiber.App) {
 	app.Use(logger.New())
-	app.Use(cors.New())
+	app.Use(cors.New(cors.Config{
+		AllowOrigins: os.Getenv("FRONTEND_URL"),
+		AllowHeaders: "Origin, Content-Type, Accept",
+	}))
+
+	// Use /api for all the api calls
+	api := app.Group("/api")
 
 	// auth
-	app.Post("/register", controllers.Register)
-	app.Post("/login", controllers.Login)
+	api.Post("/register", controllers.Register)
+	api.Post("/login", controllers.Login)
 
 	// homepage
-	app.Get("/", middleware.VerifyJWT, controllers.Home)
+	api.Get("/", middleware.VerifyJWT, controllers.Home)
 }

@@ -1,5 +1,5 @@
-import axios from "axios";
 import React, { useState } from "react"
+import apiClient from "../config/axiosConfig";
 
 interface FormData {
 	email: string;
@@ -28,8 +28,9 @@ export default function Register() {
 		e.preventDefault();
 		
 		try {
-			const response = await axios.post("http://localhost:3000/register", formData)
+			const response = await apiClient.post("/api/register", formData)
 			alert(response.data.message)
+			console.log(response)
 		} catch (error: any){ // eslint-disable-line @typescript-eslint/no-explicit-any
 			alert(error.response.data.message)
 		}
