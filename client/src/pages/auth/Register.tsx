@@ -4,13 +4,13 @@ import AuthPageSection from "../../components/AuthPageSection";
 import FormInput from "../../components/FormInput";
 import AuthForm from "../../components/AuthForm";
 import Box from "../../components/Box";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 interface FormData {
-	email: string;
-	first_name: string;
-	last_name: string;
-	password: string;
+	email: string,
+	first_name: string,
+	last_name: string,
+	password: string,
 }
 
 const Register = () => {
@@ -20,6 +20,7 @@ const Register = () => {
 		last_name: "",
 		password: "",
 	});
+	const navigate = useNavigate()
 
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const { name, value } = e.target;
@@ -35,7 +36,8 @@ const Register = () => {
 		try {
 			const response = await apiClient.post("/api/register", formData)
 			alert(response.data.message)
-			console.log(response)
+			
+			navigate("/login")
 		} catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
 			alert(error.response.data.message)
 		}

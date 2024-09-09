@@ -68,7 +68,7 @@ func Login(c *fiber.Ctx) error {
 	user := new(models.User)
 
 	filter := bson.M{"_id": data.Email}
-	opts := options.FindOne().SetProjection(bson.M{"password": 1})
+	opts := options.FindOne().SetProjection(bson.M{"password": 1, "first_name": 1})
 	err := users.FindOne(context.TODO(), filter, opts).Decode(&user)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
@@ -107,8 +107,10 @@ func Login(c *fiber.Ctx) error {
 	}
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"success": true,
-		"message": "Logged in successfully",
-		"token":   token,
+		"success":    true,
+		"message":    "Logged in successfully",
+		"email":      user.Email,
+		"first_name": user.FirstName,
+		"token":      token,
 	})
 }
