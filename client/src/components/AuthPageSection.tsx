@@ -1,4 +1,5 @@
 import React from 'react'
+import Section from './Section'
 
 interface Props {
 	children: React.ReactNode
@@ -6,7 +7,7 @@ interface Props {
 
 const AuthPageSection: React.FC<Props> = ({children}) => {
 	return (
-		<section className="bg-gray-50 dark:bg-gray-900">
+		<Section>
 			<div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
 				<a
 					href="#"
@@ -16,7 +17,7 @@ const AuthPageSection: React.FC<Props> = ({children}) => {
 				</a>
 				{children}
 			</div>
-		</section>
+			</Section>
 	)
 }
 

@@ -17,7 +17,7 @@ const Login = () => {
 		email: "",
 		password: "",
 	});
-	const { setAuthUser, setIsLoggedIn } = useAuth()
+	const { setAuthUser } = useAuth()
 	const navigate = useNavigate()
 
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -33,14 +33,12 @@ const Login = () => {
 
 		try {
 			const response = await apiClient.post("/api/login", formData)
-			alert(response.data.message)
 
 			setAuthUser({
-				email: response.data.email,
 				first_name: response.data.first_name,
 			})
-			setIsLoggedIn(true)
 
+			alert(response.data.message)
 			navigate("/")
 		} catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
 			alert(error.response.data.message)

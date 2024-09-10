@@ -1,30 +1,37 @@
 package middleware
 
 import (
+	"errors"
 	"os"
-	"strings"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
 )
 
 func VerifyJWT(c *fiber.Ctx) error {
-	if c.Get("Authorization") == "" {
-		return c.Status(401).JSON(fiber.Map{
+	cookieToken := c.Cookies("authToken")
+
+	if cookieToken == "" {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"success": false,
-			"message": "Unauthorized",
+			"message": "Missing JWT",
 		})
 	}
 
-	authHeader := strings.Split(c.Get("Authorization"), " ")[1]
-
-	token, err := jwt.ParseWithClaims(authHeader, &jwt.MapClaims{},
+	token, err := jwt.ParseWithClaims(cookieToken, &jwt.MapClaims{},
 		func(token *jwt.Token) (interface{}, error) {
 			return []byte(os.Getenv("LOGIN_KEY")), nil
 		},
 	)
 	if err != nil {
-		return c.Status(401).JSON(fiber.Map{
+		if errors.Is(err, jwt.ErrTokenExpired) {
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+				"success": false,
+				"message": "Token expired, please log in again",
+			})
+		}
+
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"success": false,
 			"message": "Unauthorized",
 		})
@@ -32,7 +39,7 @@ func VerifyJWT(c *fiber.Ctx) error {
 
 	claims, ok := token.Claims.(*jwt.MapClaims)
 	if !ok {
-		return c.Status(500).JSON(fiber.Map{
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"success": false,
 			"message": "Failed to parse jwt claims",
 		})

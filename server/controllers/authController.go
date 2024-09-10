@@ -98,6 +98,7 @@ func Login(c *fiber.Ctx) error {
 		"exp": time.Now().Add(time.Minute * 15).Unix(),
 	})
 
+	// The token now has sub: email, and exp: 15mins from login time
 	token, err := claims.SignedString([]byte(os.Getenv("LOGIN_KEY")))
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -106,11 +107,18 @@ func Login(c *fiber.Ctx) error {
 		})
 	}
 
+	// Set an HTTPOnly cookie with the token
+	c.Cookie(&fiber.Cookie{
+		Name:     "authToken",
+		Value:    token,
+		HTTPOnly: true,     // Prevents JS access to the token
+		Secure:   true,     // Only sent over HTTPS
+		SameSite: "Strict", // Mitigates CSRF
+	})
+
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success":    true,
 		"message":    "Logged in successfully",
-		"email":      user.Email,
 		"first_name": user.FirstName,
-		"token":      token,
 	})
 }
