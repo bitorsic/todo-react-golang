@@ -13,8 +13,9 @@ import (
 func Setup(app *fiber.App) {
 	app.Use(logger.New())
 	app.Use(cors.New(cors.Config{
-		AllowOrigins: os.Getenv("FRONTEND_URL"),
-		AllowHeaders: "Origin, Content-Type, Accept",
+		AllowOrigins:     os.Getenv("FRONTEND_URL"),
+		AllowCredentials: true,
+		AllowHeaders:     "Origin, Content-Type, Accept",
 	}))
 
 	// Use /api for all the api calls
@@ -24,6 +25,6 @@ func Setup(app *fiber.App) {
 	api.Post("/register", controllers.Register)
 	api.Post("/login", controllers.Login)
 
-	// homepage
-	api.Get("/", middleware.VerifyJWT, controllers.Home)
+	// tasks
+	api.Get("/tasklists", middleware.VerifyJWT, controllers.GetTaskLists)
 }

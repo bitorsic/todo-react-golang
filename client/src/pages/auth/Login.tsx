@@ -12,7 +12,7 @@ interface FormData {
 	password: string,
 }
 
-const Login = () => {
+const Login: React.FC = () => {
 	const [formData, setFormData] = useState<FormData>({
 		email: "",
 		password: "",
@@ -41,6 +41,7 @@ const Login = () => {
 			alert(response.data.message)
 			navigate("/")
 		} catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
+			console.log(error)
 			alert(error.response.data.message)
 		}
 	};

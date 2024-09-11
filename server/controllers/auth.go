@@ -1,10 +1,9 @@
 package controllers
 
 import (
-	"context"
-	"fmt"
 	"golang-backend/config"
 	"golang-backend/models"
+	"golang-backend/utils"
 	"os"
 	"time"
 
@@ -20,18 +19,28 @@ func Register(c *fiber.Ctx) error {
 	var users = config.DB.Collection("users")
 	user := new(models.User)
 
-	if err := c.BodyParser(user); err != nil {
-		fmt.Print(err)
+	// parsing req body to user
+	err := c.BodyParser(user)
+	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
 			"message": "Invalid Data",
 		})
 	}
 
+	err = user.Validate()
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": err.Error(),
+		})
+	}
+
+	// hashing and storing the password
 	passwordBytes, _ := bcrypt.GenerateFromPassword([]byte(user.Password), 10)
 	user.Password = string(passwordBytes)
 
-	_, err := users.InsertOne(context.TODO(), user)
+	_, err = users.InsertOne(c.Context(), user)
 	if err != nil {
 		if mongo.IsDuplicateKeyError(err) {
 			return c.Status(fiber.StatusConflict).JSON(fiber.Map{
@@ -47,6 +56,16 @@ func Register(c *fiber.Ctx) error {
 		})
 	}
 
+	// creating the first TaskList for the user
+	err = utils.CreateTaskList(user.Email, user.FirstName+"'s Tasks", c.Context())
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "Error while creating TaskList",
+			"err":     err,
+		})
+	}
+
 	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
 		"success": true,
 		"message": "User Created",
@@ -57,8 +76,8 @@ func Login(c *fiber.Ctx) error {
 	var users = config.DB.Collection("users")
 	data := new(models.User)
 
-	if err := c.BodyParser(data); err != nil {
-		fmt.Print(err)
+	err := c.BodyParser(data)
+	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
 			"message": "Invalid Data",
@@ -68,8 +87,11 @@ func Login(c *fiber.Ctx) error {
 	user := new(models.User)
 
 	filter := bson.M{"_id": data.Email}
-	opts := options.FindOne().SetProjection(bson.M{"password": 1, "first_name": 1})
-	err := users.FindOne(context.TODO(), filter, opts).Decode(&user)
+	opts := options.FindOne().SetProjection(bson.M{
+		"password":   1,
+		"first_name": 1,
+	})
+	err = users.FindOne(c.Context(), filter, opts).Decode(&user)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
