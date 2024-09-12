@@ -10,7 +10,7 @@ type TaskList struct {
 	ID    primitive.ObjectID `bson:"_id,omitempty" json:"id"`
 	Title string             `bson:"title" json:"title"`
 	Owner string             `bson:"owner" json:"owner"`
-	Tasks []string           `bson:"tasks,omitempty" json:"tasks"`
+	Tasks []Task             `bson:"tasks,omitempty" json:"tasks"`
 }
 
 func (tl *TaskList) Validate() error {

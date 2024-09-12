@@ -1,29 +1,17 @@
 import { useEffect, useState } from "react"
 import Section from "../components/Section"
-import TaskListCard from "../components/TaskListCard"
+import TaskListCard, { TaskListType } from "../components/TaskListCard"
 import { useAuth } from "../hooks/useAuth"
 import apiClient from "../config/axiosConfig"
-
-export interface TaskListType {
-	id: string,
-	title: string,
-	tasks: string[]
-}
 
 const Dashboard: React.FC = () => {
 	const [taskLists, setTaskLists] = useState<TaskListType[]>([])
 	const { authUser } = useAuth()
 
-	// const taskLists = [
-	// 	{ id: "eyedee1", title: "title1" },
-	// 	{ id: "eyedee2", title: "title2" },
-	// 	{ id: "eyedee3", title: "title3" },
-	// ]
-
 	useEffect(() => {
 		(async () => {
 			try {
-				const response = await apiClient.get("/api/tasklists")
+				const response = await apiClient.get("/api/tasks")
 	
 				setTaskLists(response.data.task_lists)
 			} catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any

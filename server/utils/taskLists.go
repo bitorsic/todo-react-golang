@@ -21,6 +21,11 @@ func CreateTaskList(email string, title string, c context.Context) error {
 		Owner: email,
 	}
 
+	err := taskList.Validate()
+	if err != nil {
+		return err
+	}
+
 	// saving the tasklist to DB
 	result, err := taskLists.InsertOne(c, taskList)
 	if err != nil {
@@ -30,11 +35,11 @@ func CreateTaskList(email string, title string, c context.Context) error {
 	taskListID := result.InsertedID.(primitive.ObjectID)
 
 	// appending the id of inserted tasklist to the task_lists field of the user
-	options := bson.D{{
-		Key: "$push", Value: bson.M{
+	options := bson.M{
+		"$push": bson.M{
 			"task_lists": taskListID,
 		},
-	}}
+	}
 	_, err = users.UpdateByID(c, email, options)
 	if err != nil {
 		return err

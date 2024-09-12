@@ -25,6 +25,10 @@ func Setup(app *fiber.App) {
 	api.Post("/register", controllers.Register)
 	api.Post("/login", controllers.Login)
 
+	// routes below this need to be protected so using the auth middleware now
+	api.Use(middleware.VerifyJWT)
+
 	// tasks
-	api.Get("/tasklists", middleware.VerifyJWT, controllers.GetTaskLists)
+	api.Get("/tasks", controllers.GetTaskLists)
+	api.Post("/tasks/:taskListID", controllers.AddTask)
 }
