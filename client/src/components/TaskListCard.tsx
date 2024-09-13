@@ -36,8 +36,14 @@ const TaskListCard: React.FC<Props> = ({ obj }) => {
 			const response = await apiClient.post("/api/tasks/" + obj.id, newTask)
 
 			newTask.id = response.data.taskID
-			setTasks((prevTasks) => [...prevTasks, newTask]);
-			
+
+			// handling empty array
+			if (tasks) {
+				setTasks((prevTasks) => [...prevTasks, newTask]);
+			} else {
+				setTasks([newTask])
+			}
+
 			// Clear the input after adding the task
 			setTaskInput("");
 			setClickedAdd(false);
@@ -60,11 +66,11 @@ const TaskListCard: React.FC<Props> = ({ obj }) => {
 					className="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700">
 					{!clickedAdd ? ( // plus symbol when not clicked
 						<svg className="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-							<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7 7V5" />
+							<path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 12h14m-7 7V5" />
 						</svg>
 					) : ( // minus symbol when clicked
 						<svg className="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-							<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14" />
+							<path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 12h14" />
 						</svg>
 					)}
 					<span className="sr-only">Add Task</span>
@@ -81,11 +87,12 @@ const TaskListCard: React.FC<Props> = ({ obj }) => {
 					))}
 					{clickedAdd && (
 						// Code for the input field for new task
-						<li className="pt-3 sm:pt-4 px-3 sm:px-4 items-center">
+						<li className="pt-3 sm:pt-4 px-1.5 sm:px-2 items-center">
 							<input
 								type="text"
 								name="test"
 								id="test"
+								placeholder="Add New Task"
 								value={taskInput}
 								onChange={handleChange}
 								className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
@@ -93,7 +100,7 @@ const TaskListCard: React.FC<Props> = ({ obj }) => {
 							<div className="flex justify-end">
 								<button
 									onClick={addNewTask}
-									className="text-white bg-primary-600 hover:bg-primary-700 font-medium rounded-lg text-sm mt-4 mx-4 px-5 py-2 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
+									className="text-white bg-primary-600 hover:bg-primary-700 font-medium rounded-lg text-sm mt-4 mx-2 px-5 py-2 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
 								>
 									Add
 								</button>

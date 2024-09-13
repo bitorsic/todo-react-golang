@@ -52,17 +52,17 @@ func Register(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"success": false,
 			"message": "Error while saving to the database",
-			"err":     err,
+			"err":     err.Error(),
 		})
 	}
 
 	// creating the first TaskList for the user
-	err = utils.CreateTaskList(user.Email, user.FirstName+"'s Tasks", c.Context())
+	_, err = utils.CreateTaskList(user.Email, user.FirstName+"'s Tasks", c.Context())
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"success": false,
 			"message": "Error while creating TaskList",
-			"err":     err,
+			"err":     err.Error(),
 		})
 	}
 
@@ -103,7 +103,7 @@ func Login(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"success": false,
 			"message": "Error while finding in the database",
-			"err":     err,
+			"err":     err.Error(),
 		})
 	}
 

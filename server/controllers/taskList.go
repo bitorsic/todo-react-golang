@@ -3,6 +3,7 @@ package controllers
 import (
 	"golang-backend/config"
 	"golang-backend/models"
+	"golang-backend/utils"
 
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
@@ -24,7 +25,7 @@ func GetTaskLists(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"success": false,
 			"message": "Error while finding in the database",
-			"err":     err,
+			"err":     err.Error(),
 		})
 	}
 
@@ -34,12 +35,45 @@ func GetTaskLists(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"success": false,
 			"message": "Error while iterating cursor",
-			"err":     err,
+			"err":     err.Error(),
 		})
 	}
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success":    true,
 		"task_lists": result,
+	})
+}
+
+func AddTaskList(c *fiber.Ctx) error {
+	email := c.Locals("email").(string)
+
+	type Input struct {
+		Title string `json:"title"`
+	}
+
+	var input Input
+
+	// parsing req body to user
+	err := c.BodyParser(&input)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "Invalid Data",
+		})
+	}
+
+	taskList, err := utils.CreateTaskList(email, input.Title, c.Context())
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "Error while creating TaskList",
+			"err":     err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"success":   true,
+		"task_list": *taskList,
 	})
 }

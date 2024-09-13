@@ -41,18 +41,30 @@ func AddTask(c *fiber.Ctx) error {
 		})
 	}
 
-	// appending the task to the task_lists field of the user
-	options := bson.M{
+	// appending the task to the tasks field of the tasklist
+	filter := bson.M{
+		"_id":   taskListID,
+		"owner": c.Locals("email"),
+	}
+	update := bson.M{
 		"$push": bson.M{
 			"tasks": task,
 		},
 	}
-	_, err = taskLists.UpdateByID(c.Context(), taskListID, options)
+	result, err := taskLists.UpdateOne(c.Context(), filter, update)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"success": false,
 			"message": "Error while adding task",
-			"err":     err,
+			"err":     err.Error(),
+		})
+	}
+
+	// if no tasklist updated
+	if result.MatchedCount == 0 {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"success": false,
+			"message": "TaskList not found or permission denied",
 		})
 	}
 

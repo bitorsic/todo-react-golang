@@ -30,5 +30,6 @@ func Setup(app *fiber.App) {
 
 	// tasks
 	api.Get("/tasks", controllers.GetTaskLists)
+	api.Post("/tasks", controllers.AddTaskList)
 	api.Post("/tasks/:taskListID", controllers.AddTask)
 }

@@ -11,7 +11,7 @@ import (
 
 // takes in email, title of tasklist, and the context
 // putting it in utils because the register endpoint creates the first tasklist for user
-func CreateTaskList(email string, title string, c context.Context) error {
+func CreateTaskList(email string, title string, c context.Context) (*models.TaskList, error) {
 	var users = config.DB.Collection("users")
 	var taskLists = config.DB.Collection("task_lists")
 
@@ -23,27 +23,27 @@ func CreateTaskList(email string, title string, c context.Context) error {
 
 	err := taskList.Validate()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// saving the tasklist to DB
 	result, err := taskLists.InsertOne(c, taskList)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	taskListID := result.InsertedID.(primitive.ObjectID)
+	taskList.ID = result.InsertedID.(primitive.ObjectID)
 
 	// appending the id of inserted tasklist to the task_lists field of the user
 	options := bson.M{
 		"$push": bson.M{
-			"task_lists": taskListID,
+			"task_lists": taskList.ID,
 		},
 	}
 	_, err = users.UpdateByID(c, email, options)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return &taskList, nil
 }
