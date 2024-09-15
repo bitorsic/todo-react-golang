@@ -4,11 +4,8 @@ import (
 	"golang-backend/config"
 	"golang-backend/models"
 	"golang-backend/utils"
-	"os"
-	"time"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/golang-jwt/jwt/v5"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -115,32 +112,36 @@ func Login(c *fiber.Ctx) error {
 		})
 	}
 
-	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"sub": user.Email,
-		"exp": time.Now().Add(time.Minute * 15).Unix(),
-	})
-
-	// The token now has sub: email, and exp: 15mins from login time
-	token, err := claims.SignedString([]byte(os.Getenv("LOGIN_KEY")))
+	authToken, err := utils.CreateJWT(user.Email, false)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"success": false,
-			"message": "Failed to generate token",
+			"message": "Failed to generate auth token",
 		})
 	}
 
-	// Set an HTTPOnly cookie with the token
+	refreshToken, err := utils.CreateJWT(user.Email, true)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "Failed to generate refresh token",
+		})
+	}
+
+	// Set an HTTPOnly cookie with the refresh token
 	c.Cookie(&fiber.Cookie{
-		Name:     "authToken",
-		Value:    token,
+		Name:     "refreshToken",
+		Value:    refreshToken,
 		HTTPOnly: true,     // Prevents JS access to the token
 		Secure:   true,     // Only sent over HTTPS
 		SameSite: "Strict", // Mitigates CSRF
 	})
 
+	// Send the auth token in the body, frontend will use it in header
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success":    true,
 		"message":    "Logged in successfully",
 		"first_name": user.FirstName,
+		"authToken":  authToken,
 	})
 }

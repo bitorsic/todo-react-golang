@@ -15,7 +15,7 @@ func Setup(app *fiber.App) {
 	app.Use(cors.New(cors.Config{
 		AllowOrigins:     os.Getenv("FRONTEND_URL"),
 		AllowCredentials: true,
-		AllowHeaders:     "Origin, Content-Type, Accept",
+		AllowHeaders:     "Origin, Content-Type, Accept, Authorization",
 	}))
 
 	// Use /api for all the api calls

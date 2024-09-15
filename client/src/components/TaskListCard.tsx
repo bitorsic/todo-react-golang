@@ -1,5 +1,6 @@
 import { useState } from "react"
 import apiClient from "../config/axiosConfig"
+import { useAuth } from "../hooks/useAuth"
 
 interface TaskType {
 	id: string,
@@ -20,6 +21,7 @@ const TaskListCard: React.FC<Props> = ({ obj }) => {
 	const [clickedAdd, setClickedAdd] = useState<boolean>(false)
 	const [taskInput, setTaskInput] = useState<string>("")
 	const [tasks, setTasks] = useState<TaskType[]>(obj.tasks); // Store tasks in state
+	const { authUser } = useAuth()
 
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const { value } = e.target;
@@ -33,7 +35,9 @@ const TaskListCard: React.FC<Props> = ({ obj }) => {
 		}
 
 		try {
-			const response = await apiClient.post("/api/tasks/" + obj.id, newTask)
+			const response = await apiClient.post("/api/tasks/" + obj.id, newTask, {
+				headers: {'Authorization': `Bearer ${authUser?.authToken}`}
+			})
 
 			newTask.id = response.data.taskID
 
