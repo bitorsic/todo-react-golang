@@ -1,11 +1,12 @@
 import React, { useState } from "react"
 import apiClient from "../../config/axiosConfig";
-import AuthPageSection from "../../components/AuthPageSection";
 import Box from "../../components/Box";
 import AuthForm from "../../components/AuthForm";
 import FormInput from "../../components/FormInput";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
+import { AuthUserType } from "../../contexts/AuthContext";
+import Section from "../../components/Section";
 
 interface FormData {
 	email: string,
@@ -18,7 +19,6 @@ const Login: React.FC = () => {
 		password: "",
 	});
 	const { setAuthUser } = useAuth()
-	const navigate = useNavigate()
 
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const { name, value } = e.target;
@@ -33,22 +33,20 @@ const Login: React.FC = () => {
 
 		try {
 			const response = await apiClient.post("/api/login", formData)
-
-			setAuthUser({
+			const obj: AuthUserType = {
 				authToken: response.data.authToken,
 				first_name: response.data.first_name,
-			})
+			}
 
-			alert(response.data.message)
-			navigate("/")
+			setAuthUser(obj)
+			localStorage.setItem("authUser", JSON.stringify(obj))
 		} catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
-			console.log(error)
-			alert(error.response.data.message)
+			alert(error.response.data.error)
 		}
 	};
 
 	return (
-		<AuthPageSection>
+		<Section>
 			<Box title="Login">
 				<AuthForm submitHandler={handleSubmit} buttonText="Log in">
 					<FormInput
@@ -75,7 +73,7 @@ const Login: React.FC = () => {
 					</Link>
 				</p>
 			</Box>
-		</AuthPageSection>
+		</Section>
 	)
 }
 

@@ -6,14 +6,13 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func VerifyJWT(c *fiber.Ctx) error {
+func VerifyAuthToken(c *fiber.Ctx) error {
 	authHeader := c.Get("Authorization")
 
 	// Check if it starts with "Bearer "
 	if len(authHeader) < 7 || authHeader[:7] != "Bearer " {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-			"success": false,
-			"err":     "invalid authorization header format",
+			"error": "invalid authorization header format",
 		})
 	}
 
@@ -21,16 +20,14 @@ func VerifyJWT(c *fiber.Ctx) error {
 
 	if authToken == "" {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-			"success": false,
-			"err":     "missing auth token",
+			"error": "missing auth token",
 		})
 	}
 
 	email, err := utils.VerifyJWT(authToken, false)
 	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-			"success": false,
-			"err":     err.Error(),
+			"error": err.Error(),
 		})
 	}
 
@@ -38,16 +35,14 @@ func VerifyJWT(c *fiber.Ctx) error {
 
 	// if cookieToken == "" {
 	// 	return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-	// 		"success": false,
-	// 		"err":     "missing refresh token",
+	// 		"error": "missing refresh token",
 	// 	})
 	// }
 
 	// email, err := utils.VerifyJWT(cookieToken, true)
 	// if err != nil {
 	// 	return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-	// 		"success": false,
-	// 		"err":     err.Error(),
+	// 		"error": err.Error(),
 	// 	})
 	// }
 

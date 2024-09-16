@@ -16,8 +16,7 @@ func AddTask(c *fiber.Ctx) error {
 	taskListID, err := primitive.ObjectIDFromHex(c.Params("taskListID"))
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"success": false,
-			"message": "Invalid Task List ID",
+			"error": "invalid tasklist id",
 		})
 	}
 
@@ -26,8 +25,7 @@ func AddTask(c *fiber.Ctx) error {
 	err = c.BodyParser(task)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"success": false,
-			"message": "Invalid Data",
+			"error": "invalid data",
 		})
 	}
 
@@ -36,8 +34,7 @@ func AddTask(c *fiber.Ctx) error {
 	err = task.Validate()
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"success": false,
-			"message": err.Error(),
+			"error": err.Error(),
 		})
 	}
 
@@ -54,23 +51,18 @@ func AddTask(c *fiber.Ctx) error {
 	result, err := taskLists.UpdateOne(c.Context(), filter, update)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"success": false,
-			"message": "Error while adding task",
-			"err":     err.Error(),
+			"error": "error while adding task:\n" + err.Error(),
 		})
 	}
 
 	// if no tasklist updated
 	if result.MatchedCount == 0 {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-			"success": false,
-			"message": "TaskList not found or permission denied",
+			"error": "taskList not found / permission denied",
 		})
 	}
 
 	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
-		"success": true,
-		"message": "Task Added",
-		"taskID":  task.ID,
+		"taskID": task.ID,
 	})
 }

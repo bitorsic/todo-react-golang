@@ -11,6 +11,13 @@ import (
 )
 
 func Setup(app *fiber.App) {
+	//--------------------- NOTE TO SELF/CONTRIBUTOR ---------------------//
+	// for the sake of consistency, when creating a controller,
+	// if request fails => "error" (error should be in lowercase)
+	// if request succeeds => directly return data OR just send status code
+	// and use appropriate http status codes
+	//--------------------------------------------------------------------//
+
 	app.Use(logger.New())
 	app.Use(cors.New(cors.Config{
 		AllowOrigins:     os.Getenv("FRONTEND_URL"),
@@ -26,7 +33,7 @@ func Setup(app *fiber.App) {
 	api.Post("/login", controllers.Login)
 
 	// routes below this need to be protected so using the auth middleware now
-	api.Use(middleware.VerifyJWT)
+	api.Use(middleware.VerifyAuthToken)
 
 	// tasks
 	api.Get("/tasks", controllers.GetTaskLists)

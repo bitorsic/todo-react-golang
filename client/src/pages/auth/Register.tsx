@@ -1,10 +1,10 @@
 import React, { useState } from "react"
 import apiClient from "../../config/axiosConfig";
-import AuthPageSection from "../../components/AuthPageSection";
 import FormInput from "../../components/FormInput";
 import AuthForm from "../../components/AuthForm";
 import Box from "../../components/Box";
 import { Link, useNavigate } from "react-router-dom";
+import Section from "../../components/Section";
 
 interface FormData {
 	email: string,
@@ -34,17 +34,17 @@ const Register: React.FC = () => {
 		e.preventDefault();
 
 		try {
-			const response = await apiClient.post("/api/register", formData)
-			alert(response.data.message)
+			await apiClient.post("/api/register", formData)
+			alert("Registration Successful\nPlease log in on the next page")
 			
 			navigate("/login")
 		} catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
-			alert(error.response.data.message)
+			alert(error.response.data.error)
 		}
 	};
 
 	return (
-		<AuthPageSection>
+		<Section>
 			<Box title="Create an account">
 				<AuthForm submitHandler={handleSubmit} buttonText="Register">
 					<FormInput
@@ -84,7 +84,7 @@ const Register: React.FC = () => {
 					</Link>
 				</p>
 			</Box>
-		</AuthPageSection>
+		</Section>
 	)
 }
 

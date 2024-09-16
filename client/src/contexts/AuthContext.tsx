@@ -1,6 +1,6 @@
-import React, { createContext, useState } from "react";
+import React, { createContext, useEffect, useState } from "react";
 
-interface AuthUserType {
+export interface AuthUserType {
 	authToken: string,
 	first_name: string,
 }
@@ -19,6 +19,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 		authUser,
 		setAuthUser,
 	}
+
+	useEffect(() => {
+		const localUser = localStorage.getItem('authUser')
+		if (localUser) {
+			const userObj: AuthUserType = JSON.parse(localUser)
+			setAuthUser(userObj)
+		}
+	}, [])
 
 	return (
 		<AuthContext.Provider value={value}>

@@ -16,7 +16,7 @@ func CreateJWT(email string, isRefresh bool) (string, error) {
 		duration = time.Hour * 24 * 30 // 1 month
 	} else {
 		key = os.Getenv("AUTH_TOKEN_KEY")
-		duration = time.Minute * 15
+		duration = time.Minute * 10
 	}
 
 	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
@@ -34,10 +34,13 @@ func CreateJWT(email string, isRefresh bool) (string, error) {
 
 func VerifyJWT(token string, isRefresh bool) (string, error) {
 	var key string
+	var tokenType string
 	if isRefresh {
 		key = os.Getenv("REFRESH_TOKEN_KEY")
+		tokenType = "refresh"
 	} else {
 		key = os.Getenv("AUTH_TOKEN_KEY")
+		tokenType = "auth"
 	}
 
 	tokenJWT, err := jwt.ParseWithClaims(token, &jwt.MapClaims{},
@@ -47,7 +50,7 @@ func VerifyJWT(token string, isRefresh bool) (string, error) {
 	)
 	if err != nil {
 		if errors.Is(err, jwt.ErrTokenExpired) {
-			return "", errors.New("token expired, please log in again")
+			return "", errors.New(tokenType + " token expired")
 		}
 
 		return "", errors.New("unauthorized")

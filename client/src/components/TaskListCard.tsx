@@ -52,8 +52,7 @@ const TaskListCard: React.FC<Props> = ({ obj }) => {
 			setTaskInput("");
 			setClickedAdd(false);
 		} catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
-			console.log(error)
-			alert(error.response.data.message)
+			alert(error.response.data.error)
 		}
 	}
 

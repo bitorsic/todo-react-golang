@@ -23,9 +23,7 @@ func GetTaskLists(c *fiber.Ctx) error {
 	cursor, err := taskLists.Find(c.Context(), filter, opts)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"success": false,
-			"message": "Error while finding in the database",
-			"err":     err.Error(),
+			"error": "error while finding in the database:\n" + err.Error(),
 		})
 	}
 
@@ -33,16 +31,13 @@ func GetTaskLists(c *fiber.Ctx) error {
 	err = cursor.All(c.Context(), &result)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"success": false,
-			"message": "Error while iterating cursor",
-			"err":     err.Error(),
+			"error": "error while iterating cursor:\n" + err.Error(),
 		})
 	}
 
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"success":    true,
-		"task_lists": result,
-	})
+	return c.Status(fiber.StatusOK).JSON(
+		result,
+	)
 }
 
 func AddTaskList(c *fiber.Ctx) error {
@@ -58,22 +53,18 @@ func AddTaskList(c *fiber.Ctx) error {
 	err := c.BodyParser(&input)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"success": false,
-			"message": "Invalid Data",
+			"error": "invalid data",
 		})
 	}
 
 	taskList, err := utils.CreateTaskList(email, input.Title, c.Context())
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"success": false,
-			"message": "Error while creating TaskList",
-			"err":     err.Error(),
+			"error": "error while creating tasklist:\n" + err.Error(),
 		})
 	}
 
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"success":   true,
-		"task_list": *taskList,
-	})
+	return c.Status(fiber.StatusOK).JSON(
+		*taskList,
+	)
 }

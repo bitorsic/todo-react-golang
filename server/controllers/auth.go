@@ -4,6 +4,7 @@ import (
 	"golang-backend/config"
 	"golang-backend/models"
 	"golang-backend/utils"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
@@ -20,16 +21,14 @@ func Register(c *fiber.Ctx) error {
 	err := c.BodyParser(user)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"success": false,
-			"message": "Invalid Data",
+			"error": "invalid data",
 		})
 	}
 
 	err = user.Validate()
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"success": false,
-			"message": err.Error(),
+			"error": err.Error(),
 		})
 	}
 
@@ -41,15 +40,12 @@ func Register(c *fiber.Ctx) error {
 	if err != nil {
 		if mongo.IsDuplicateKeyError(err) {
 			return c.Status(fiber.StatusConflict).JSON(fiber.Map{
-				"success": false,
-				"message": "Email is already in use",
+				"error": "email is already in use",
 			})
 		}
 
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"success": false,
-			"message": "Error while saving to the database",
-			"err":     err.Error(),
+			"error": "error while saving to the database:\n" + err.Error(),
 		})
 	}
 
@@ -57,16 +53,11 @@ func Register(c *fiber.Ctx) error {
 	_, err = utils.CreateTaskList(user.Email, user.FirstName+"'s Tasks", c.Context())
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"success": false,
-			"message": "Error while creating TaskList",
-			"err":     err.Error(),
+			"error": "error while creating tasklist:\n" + err.Error(),
 		})
 	}
 
-	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
-		"success": true,
-		"message": "User Created",
-	})
+	return c.SendStatus(fiber.StatusCreated)
 }
 
 func Login(c *fiber.Ctx) error {
@@ -76,8 +67,7 @@ func Login(c *fiber.Ctx) error {
 	err := c.BodyParser(data)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"success": false,
-			"message": "Invalid Data",
+			"error": "invalid data",
 		})
 	}
 
@@ -92,39 +82,33 @@ func Login(c *fiber.Ctx) error {
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-				"success": false,
-				"message": "Invalid Credentials",
+				"error": "invalid credentials",
 			})
 		}
 
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"success": false,
-			"message": "Error while finding in the database",
-			"err":     err.Error(),
+			"error": "error while finding in the database:\n" + err.Error(),
 		})
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(data.Password))
 	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-			"success": false,
-			"message": "Invalid Credentials",
+			"error": "invalid credentials",
 		})
 	}
 
 	authToken, err := utils.CreateJWT(user.Email, false)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"success": false,
-			"message": "Failed to generate auth token",
+			"error": "error while generating auth token\n" + err.Error(),
 		})
 	}
 
 	refreshToken, err := utils.CreateJWT(user.Email, true)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"success": false,
-			"message": "Failed to generate refresh token",
+			"error": "error while generating refresh token\n" + err.Error(),
 		})
 	}
 
@@ -132,6 +116,7 @@ func Login(c *fiber.Ctx) error {
 	c.Cookie(&fiber.Cookie{
 		Name:     "refreshToken",
 		Value:    refreshToken,
+		Expires:  time.Now().Add(time.Hour * 24 * 30),
 		HTTPOnly: true,     // Prevents JS access to the token
 		Secure:   true,     // Only sent over HTTPS
 		SameSite: "Strict", // Mitigates CSRF
@@ -139,8 +124,6 @@ func Login(c *fiber.Ctx) error {
 
 	// Send the auth token in the body, frontend will use it in header
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"success":    true,
-		"message":    "Logged in successfully",
 		"first_name": user.FirstName,
 		"authToken":  authToken,
 	})
