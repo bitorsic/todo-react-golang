@@ -31,21 +31,6 @@ func VerifyAuthToken(c *fiber.Ctx) error {
 		})
 	}
 
-	// cookieToken := c.Cookies("refreshToken")
-
-	// if cookieToken == "" {
-	// 	return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-	// 		"error": "missing refresh token",
-	// 	})
-	// }
-
-	// email, err := utils.VerifyJWT(cookieToken, true)
-	// if err != nil {
-	// 	return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-	// 		"error": err.Error(),
-	// 	})
-	// }
-
 	c.Locals("email", email)
 	return c.Next()
 }

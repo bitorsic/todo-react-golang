@@ -2,6 +2,7 @@ package utils
 
 import (
 	"context"
+	"errors"
 	"golang-backend/config"
 	"golang-backend/models"
 
@@ -29,6 +30,7 @@ func CreateTaskList(email string, title string, c context.Context) (*models.Task
 	// saving the tasklist to DB
 	result, err := taskLists.InsertOne(c, taskList)
 	if err != nil {
+		err = errors.New("error while saving to the database:\n" + err.Error())
 		return nil, err
 	}
 
@@ -42,6 +44,7 @@ func CreateTaskList(email string, title string, c context.Context) (*models.Task
 	}
 	_, err = users.UpdateByID(c, email, options)
 	if err != nil {
+		err = errors.New("error while updating in the database:\n" + err.Error())
 		return nil, err
 	}
 

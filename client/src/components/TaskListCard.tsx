@@ -1,6 +1,6 @@
 import { useState } from "react"
-import apiClient from "../config/axiosConfig"
 import { useAuth } from "../hooks/useAuth"
+import { useAxios } from "../hooks/useAxios"
 
 interface TaskType {
 	id: string,
@@ -22,10 +22,10 @@ const TaskListCard: React.FC<Props> = ({ obj }) => {
 	const [taskInput, setTaskInput] = useState<string>("")
 	const [tasks, setTasks] = useState<TaskType[]>(obj.tasks); // Store tasks in state
 	const { authUser } = useAuth()
+	const { apiReq } = useAxios()
 
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const { value } = e.target;
-		setTaskInput(value);
+		setTaskInput(e.target.value);
 	};
 
 	const addNewTask = async () => {
@@ -34,11 +34,14 @@ const TaskListCard: React.FC<Props> = ({ obj }) => {
 			content: taskInput,
 		}
 
-		try {
-			const response = await apiClient.post("/api/tasks/" + obj.id, newTask, {
-				headers: {'Authorization': `Bearer ${authUser?.authToken}`}
-			})
+		const response = await apiReq<{ taskID: string }, TaskType>(
+			"post",
+			"/api/tasks/" + obj.id,
+			newTask,
+			authUser?.authToken,
+		)
 
+		if (response) {
 			newTask.id = response.data.taskID
 
 			// handling empty array
@@ -51,8 +54,6 @@ const TaskListCard: React.FC<Props> = ({ obj }) => {
 			// Clear the input after adding the task
 			setTaskInput("");
 			setClickedAdd(false);
-		} catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
-			alert(error.response.data.error)
 		}
 	}
 

@@ -1,5 +1,4 @@
 import React, { useState } from "react"
-import apiClient from "../../config/axiosConfig";
 import Box from "../../components/Box";
 import AuthForm from "../../components/AuthForm";
 import FormInput from "../../components/FormInput";
@@ -7,18 +6,22 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { AuthUserType } from "../../contexts/AuthContext";
 import Section from "../../components/Section";
+import { useAxios } from "../../hooks/useAxios";
 
 interface FormData {
 	email: string,
 	password: string,
+	device_id: string,
 }
 
 const Login: React.FC = () => {
 	const [formData, setFormData] = useState<FormData>({
 		email: "",
 		password: "",
+		device_id: "",
 	});
 	const { setAuthUser } = useAuth()
+	const { apiReq } = useAxios()
 
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const { name, value } = e.target;
@@ -31,17 +34,13 @@ const Login: React.FC = () => {
 	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
 
-		try {
-			const response = await apiClient.post("/api/login", formData)
-			const obj: AuthUserType = {
-				authToken: response.data.authToken,
-				first_name: response.data.first_name,
-			}
+		const response = await apiReq<AuthUserType, FormData>("post", "/api/login", formData)
+
+		if (response) {
+			const obj = response.data
 
 			setAuthUser(obj)
 			localStorage.setItem("authUser", JSON.stringify(obj))
-		} catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
-			alert(error.response.data.error)
 		}
 	};
 

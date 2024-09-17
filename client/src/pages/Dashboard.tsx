@@ -2,26 +2,30 @@ import { useEffect, useState } from "react"
 import Section from "../components/Section"
 import TaskListCard, { TaskListType } from "../components/TaskListCard"
 import { useAuth } from "../hooks/useAuth"
-import apiClient from "../config/axiosConfig"
+import { useAxios } from "../hooks/useAxios"
 
 const Dashboard: React.FC = () => {
 	const [taskLists, setTaskLists] = useState<TaskListType[]>([])
 	const [taskListInput, setTaskListInput] = useState<string>("")
 	const { authUser } = useAuth()
+	const { apiReq } = useAxios()
 
 	useEffect(() => {
 		(async () => {
-			try {
-				const response = await apiClient.get("/api/tasks", {
-					headers: { 'Authorization': `Bearer ${authUser?.authToken}` }
-				})
+			if (authUser) { // so only execute this code if authUser has been assigned
+				const response = await apiReq<TaskListType[], undefined>(
+					"get",
+					"/api/tasks",
+					undefined,
+					authUser?.authToken,
+				)
 
-				setTaskLists(response.data)
-			} catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
-				alert(error.response.data.error)
+				if (response) {
+					setTaskLists(response.data)
+				}
 			}
 		})();
-	}, []) // eslint-disable-line react-hooks/exhaustive-deps
+	}, [authUser, apiReq])
 
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const { value } = e.target;
@@ -35,18 +39,18 @@ const Dashboard: React.FC = () => {
 			tasks: [],
 		}
 
-		try {
-			const response = await apiClient.post("/api/tasks", newTaskList, {
-				headers: { 'Authorization': `Bearer ${authUser?.authToken}` }
-			})
-
+		const response = await apiReq<TaskListType, TaskListType>(
+			"post",
+			"/api/tasks",
+			newTaskList,
+			authUser?.authToken
+		)
+		if (response) {
 			newTaskList = response.data
 			setTaskLists((prevTaskLists) => [...prevTaskLists, newTaskList]);
 
 			// Clear the input after adding the tasklist
 			setTaskListInput("");
-		} catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
-			alert(error.response.data.error)
 		}
 	}
 

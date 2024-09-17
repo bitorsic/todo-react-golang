@@ -31,12 +31,18 @@ func Setup(app *fiber.App) {
 	// auth
 	api.Post("/register", controllers.Register)
 	api.Post("/login", controllers.Login)
+	api.Get("/refresh", controllers.TokenRefresh)
 
 	// routes below this need to be protected so using the auth middleware now
 	api.Use(middleware.VerifyAuthToken)
 
+	// tasklists and tasks
+	tasks := api.Group("/tasks")
+
+	// tasklists
+	tasks.Get("/", controllers.GetTaskLists)
+	tasks.Post("/", controllers.AddTaskList)
+
 	// tasks
-	api.Get("/tasks", controllers.GetTaskLists)
-	api.Post("/tasks", controllers.AddTaskList)
-	api.Post("/tasks/:taskListID", controllers.AddTask)
+	tasks.Post("/:taskListID", controllers.AddTask)
 }

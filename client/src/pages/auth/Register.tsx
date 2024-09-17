@@ -1,10 +1,10 @@
 import React, { useState } from "react"
-import apiClient from "../../config/axiosConfig";
 import FormInput from "../../components/FormInput";
 import AuthForm from "../../components/AuthForm";
 import Box from "../../components/Box";
 import { Link, useNavigate } from "react-router-dom";
 import Section from "../../components/Section";
+import { useAxios } from "../../hooks/useAxios";
 
 interface FormData {
 	email: string,
@@ -21,6 +21,7 @@ const Register: React.FC = () => {
 		password: "",
 	});
 	const navigate = useNavigate()
+	const { apiReq } = useAxios()
 
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const { name, value } = e.target;
@@ -33,13 +34,11 @@ const Register: React.FC = () => {
 	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
 
-		try {
-			await apiClient.post("/api/register", formData)
-			alert("Registration Successful\nPlease log in on the next page")
-			
+		const response = await apiReq<unknown, FormData>("post", "/api/register", formData)
+
+		if (response) {
+			alert("Registration Successful")
 			navigate("/login")
-		} catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
-			alert(error.response.data.error)
 		}
 	};
 

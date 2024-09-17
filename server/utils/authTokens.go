@@ -14,9 +14,11 @@ func CreateJWT(email string, isRefresh bool) (string, error) {
 	if isRefresh {
 		key = os.Getenv("REFRESH_TOKEN_KEY")
 		duration = time.Hour * 24 * 30 // 1 month
+		// duration = time.Second * 30 // TESTING ONLY
 	} else {
 		key = os.Getenv("AUTH_TOKEN_KEY")
 		duration = time.Minute * 10
+		// duration = time.Second * 5 // TESTING ONLY
 	}
 
 	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
@@ -53,7 +55,7 @@ func VerifyJWT(token string, isRefresh bool) (string, error) {
 			return "", errors.New(tokenType + " token expired")
 		}
 
-		return "", errors.New("unauthorized")
+		return "", err
 	}
 
 	claims, ok := tokenJWT.Claims.(*jwt.MapClaims)

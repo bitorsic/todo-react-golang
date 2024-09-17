@@ -60,7 +60,7 @@ func AddTaskList(c *fiber.Ctx) error {
 	taskList, err := utils.CreateTaskList(email, input.Title, c.Context())
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "error while creating tasklist:\n" + err.Error(),
+			"error": err.Error(),
 		})
 	}
 

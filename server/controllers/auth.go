@@ -53,7 +53,7 @@ func Register(c *fiber.Ctx) error {
 	_, err = utils.CreateTaskList(user.Email, user.FirstName+"'s Tasks", c.Context())
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "error while creating tasklist:\n" + err.Error(),
+			"error": err.Error(),
 		})
 	}
 
@@ -126,5 +126,36 @@ func Login(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"first_name": user.FirstName,
 		"authToken":  authToken,
+	})
+}
+
+func TokenRefresh(c *fiber.Ctx) error {
+	refreshToken := c.Cookies("refreshToken")
+
+	if refreshToken == "" {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"error": "missing refresh token",
+		})
+	}
+
+	// firstly verify the refreshToken
+	email, err := utils.VerifyJWT(refreshToken, true)
+	if err != nil {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	// if refreshToken is valid, generate new authToken for the user
+	authToken, err := utils.CreateJWT(email, false)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "error while generating auth token\n" + err.Error(),
+		})
+	}
+
+	// Send the auth token in the body, frontend will use it in header
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"authToken": authToken,
 	})
 }
