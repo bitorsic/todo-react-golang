@@ -1,7 +1,10 @@
 import { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 import apiClient from "../config/axiosConfig";
+import { useAuth } from "./useAuth";
 
 export const useAxios = () => {
+	const { authUser, setAuthUser } = useAuth()
+
 	const apiReq = async <TResponse, TData>(
 		method: AxiosRequestConfig["method"],
 		url: string,
@@ -22,12 +25,58 @@ export const useAxios = () => {
 			const axiosError = error as AxiosError<{ error: string }>
 
 			if (axiosError.response) {
+				// handling refresh token
 				if (
 					axiosError.response.data.error == "missing auth token" ||
 					axiosError.response.data.error == "auth token expired"
 				) {
-					// TODO: send refresh request to backend
-					alert("refresh required")
+					const fetchedAuthToken = await refreshReq()
+
+					if (fetchedAuthToken && authUser) {
+						const obj = {
+							...authUser,
+							authToken: fetchedAuthToken,
+						}
+
+						setAuthUser(obj)
+						localStorage.setItem("authUser", JSON.stringify(obj))
+
+						console.log("Token was refreshed from", authToken, "to", fetchedAuthToken)
+
+						return apiReq(method, url, data, fetchedAuthToken)
+					}
+				} else {
+					alert(axiosError.response.data.error || "An error occurred");
+				}
+
+			} else {
+				console.error("An unknown error occurred", axiosError);
+				alert("An unknown error occurred.");
+			}
+			return undefined; // Return undefined in case of an error
+		}
+	}
+
+	const refreshReq = async () => {
+		try {
+			const { data } = await apiClient<{ authToken: string }>({
+				method: "get",
+				url: "/api/refresh",
+			})
+
+			return data.authToken
+		} catch (error: unknown) {
+			const axiosError = error as AxiosError<{ error: string }>
+
+			if (axiosError.response) {
+				if (
+					axiosError.response.data.error == "missing refresh token" ||
+					axiosError.response.data.error == "refresh token expired"
+				) {
+					// logout
+					localStorage.clear()
+					setAuthUser(null)
+					alert("Session expired. Please log in again")
 				} else {
 					alert(axiosError.response.data.error || "An error occurred");
 				}

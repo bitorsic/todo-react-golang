@@ -25,7 +25,7 @@ const Dashboard: React.FC = () => {
 				}
 			}
 		})();
-	}, [authUser, apiReq])
+	}, [authUser])
 
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const { value } = e.target;

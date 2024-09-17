@@ -155,7 +155,7 @@ func TokenRefresh(c *fiber.Ctx) error {
 	}
 
 	// Send the auth token in the body, frontend will use it in header
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
 		"authToken": authToken,
 	})
 }
