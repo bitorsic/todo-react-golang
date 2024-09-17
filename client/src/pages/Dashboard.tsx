@@ -25,6 +25,7 @@ const Dashboard: React.FC = () => {
 				}
 			}
 		})();
+	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [authUser])
 
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

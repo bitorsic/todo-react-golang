@@ -41,8 +41,6 @@ export const useAxios = () => {
 						setAuthUser(obj)
 						localStorage.setItem("authUser", JSON.stringify(obj))
 
-						console.log("Token was refreshed from", authToken, "to", fetchedAuthToken)
-
 						return apiReq(method, url, data, fetchedAuthToken)
 					}
 				} else {
