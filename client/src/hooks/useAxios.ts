@@ -18,6 +18,7 @@ export const useAxios = () => {
 				// Use empty string if authToken is undefined
 				headers: { 'Authorization': `Bearer ${authToken || ''}` },
 				data,
+				withCredentials: true,
 			});
 
 			return response;
@@ -60,6 +61,7 @@ export const useAxios = () => {
 			const { data } = await apiClient<{ authToken: string }>({
 				method: "get",
 				url: "/api/refresh",
+				withCredentials: true,
 			})
 
 			return data.authToken
