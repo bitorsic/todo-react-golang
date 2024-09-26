@@ -23,7 +23,12 @@ func DBConnect() {
 		panic(err)
 	}
 
-	fmt.Printf("Database connected")
+	err = client.Ping(ctx, nil)
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println("MongoDB Connected")
 
 	DB = client.Database("golang-api")
 }

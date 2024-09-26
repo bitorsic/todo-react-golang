@@ -69,7 +69,8 @@ export const useAxios = () => {
 			if (axiosError.response) {
 				if (
 					axiosError.response.data.error == "missing refresh token" ||
-					axiosError.response.data.error == "refresh token expired"
+					axiosError.response.data.error == "refresh token expired" ||
+					axiosError.response.data.error == "refresh token blacklisted"
 				) {
 					// logout
 					localStorage.clear()

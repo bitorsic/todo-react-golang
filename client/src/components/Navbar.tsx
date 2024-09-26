@@ -1,15 +1,19 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
+import { useAxios } from '../hooks/useAxios'
 
 const Navbar: React.FC = () => {
 	const { authUser, setAuthUser } = useAuth()
+	const { apiReq } = useAxios()
 
-	const handleLogout = () => {
-		localStorage.clear()
-		setAuthUser(null)
+	const handleLogout = async () => {
+		const response = await apiReq<undefined, undefined>("delete", "/api/logout")
 
-		// TODO: hit backend api for blacklisting refresh token
+		if (response) {
+			localStorage.clear()
+			setAuthUser(null)
+		}
 	}
 
 	return (

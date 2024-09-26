@@ -138,7 +138,21 @@ func TokenRefresh(c *fiber.Ctx) error {
 		})
 	}
 
-	// firstly verify the refreshToken
+	// firstly check if the refreshToken is blacklisted
+	isBlacklisted, err := utils.IsBlacklisted(refreshToken, c.Context())
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+	// if it is blacklisted, unauthorized
+	if isBlacklisted {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"error": "refresh token blacklisted",
+		})
+	}
+
+	// then verify the refreshToken
 	email, err := utils.VerifyJWT(refreshToken, true)
 	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
@@ -158,4 +172,24 @@ func TokenRefresh(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
 		"authToken": authToken,
 	})
+}
+
+func Logout(c *fiber.Ctx) error {
+	refreshToken := c.Cookies("refreshToken")
+
+	if refreshToken == "" {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"error": "missing refresh token",
+		})
+	}
+
+	// add the refreshToken to blacklist
+	err := utils.AddToBlacklist(refreshToken, c.Context())
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	return c.SendStatus(fiber.StatusNoContent)
 }

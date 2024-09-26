@@ -11,6 +11,7 @@ import (
 func main() {
 	godotenv.Load()
 	config.DBConnect()
+	config.RedisConnect()
 
 	app := fiber.New()
 
