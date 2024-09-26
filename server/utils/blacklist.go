@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"golang-backend/config"
+	"task-inator3000/config"
 	"time"
 
 	"github.com/redis/go-redis/v9"

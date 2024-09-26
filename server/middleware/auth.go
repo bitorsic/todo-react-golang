@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"golang-backend/utils"
+	"task-inator3000/utils"
 
 	"github.com/gofiber/fiber/v2"
 )

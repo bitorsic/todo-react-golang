@@ -1,9 +1,9 @@
 package routes
 
 import (
-	"golang-backend/controllers"
-	"golang-backend/middleware"
 	"os"
+	"task-inator3000/controllers"
+	"task-inator3000/middleware"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"

@@ -1,8 +1,9 @@
 package main
 
 import (
-	"golang-backend/config"
-	"golang-backend/routes"
+	"os"
+	"task-inator3000/config"
+	"task-inator3000/routes"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/joho/godotenv"
@@ -17,5 +18,9 @@ func main() {
 
 	routes.Setup(app)
 
-	app.Listen(":3000")
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "3000"
+	}
+	app.Listen(":" + port)
 }

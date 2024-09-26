@@ -3,8 +3,8 @@ package utils
 import (
 	"context"
 	"errors"
-	"golang-backend/config"
-	"golang-backend/models"
+	"task-inator3000/config"
+	"task-inator3000/models"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"

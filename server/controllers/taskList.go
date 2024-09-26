@@ -1,9 +1,9 @@
 package controllers
 
 import (
-	"golang-backend/config"
-	"golang-backend/models"
-	"golang-backend/utils"
+	"task-inator3000/config"
+	"task-inator3000/models"
+	"task-inator3000/utils"
 
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
