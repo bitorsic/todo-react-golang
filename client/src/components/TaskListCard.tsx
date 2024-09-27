@@ -18,17 +18,21 @@ interface Props {
 }
 
 const TaskListCard: React.FC<Props> = ({ obj }) => {
-	const [clickedAdd, setClickedAdd] = useState<boolean>(false)
-	const [taskInput, setTaskInput] = useState<string>("")
+	const [clickedAdd, setClickedAdd] = useState<boolean>(false);
+	const [taskInput, setTaskInput] = useState<string>("");
 	const [tasks, setTasks] = useState<TaskType[]>(obj.tasks); // Store tasks in state
-	const { authUser } = useAuth()
-	const { apiReq } = useAxios()
+	const { authUser } = useAuth();
+	const { apiReq } = useAxios();
+
+	const [isLoading, setLoading] = useState<boolean>(false);
 
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		setTaskInput(e.target.value);
 	};
 
 	const addNewTask = async () => {
+		setLoading(true);
+
 		const newTask: TaskType = {
 			id: "",
 			content: taskInput,
@@ -39,22 +43,24 @@ const TaskListCard: React.FC<Props> = ({ obj }) => {
 			"/api/tasks/" + obj.id,
 			newTask,
 			authUser?.authToken,
-		)
+		);
 
 		if (response) {
-			newTask.id = response.data.taskID
+			newTask.id = response.data.taskID;
 
 			// handling empty array
 			if (tasks) {
 				setTasks((prevTasks) => [...prevTasks, newTask]);
 			} else {
-				setTasks([newTask])
+				setTasks([newTask]);
 			}
 
 			// Clear the input after adding the task
 			setTaskInput("");
 			setClickedAdd(false);
 		}
+
+		setLoading(false);
 	}
 
 	return (
@@ -104,9 +110,10 @@ const TaskListCard: React.FC<Props> = ({ obj }) => {
 							<div className="flex justify-end">
 								<button
 									onClick={addNewTask}
+									disabled={isLoading} // disable when api being hit
 									className="text-white bg-primary-600 hover:bg-primary-700 font-medium rounded-lg text-sm mt-4 mx-2 px-5 py-2 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
 								>
-									Add
+									{isLoading ? "Adding..." : "Add"}
 								</button>
 							</div>
 						</li>

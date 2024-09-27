@@ -4,9 +4,14 @@ import Login from "./pages/auth/Login"
 import Dashboard from "./pages/Dashboard"
 import Navbar from "./components/Navbar"
 import { useAuth } from "./hooks/useAuth"
+import FullPageSpinner from "./components/FullPageSpinner"
 
 function App() {
-	const { authUser } = useAuth()
+	const { authUser, isLoading } = useAuth()
+
+	if (isLoading) {
+		return <FullPageSpinner />
+	}
 
 	return (
 		<BrowserRouter>

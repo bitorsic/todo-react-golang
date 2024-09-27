@@ -119,7 +119,7 @@ func Login(c *fiber.Ctx) error {
 		Expires:  time.Now().Add(time.Hour * 24 * 30),
 		HTTPOnly: true,   // Prevents JS access to the token
 		Secure:   true,   // Only sent over HTTPS
-		SameSite: "None", // TODO: Implement CSRF later on
+		SameSite: "None", // can be set from backend url to frontend url
 	})
 
 	// Send the auth token in the body, frontend will use it in header

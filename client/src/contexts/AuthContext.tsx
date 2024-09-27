@@ -8,16 +8,19 @@ export interface AuthUserType {
 interface AuthContextType {
   authUser: AuthUserType | null,
   setAuthUser: (user: AuthUserType | null) => void,
+	isLoading: boolean,
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-	const [authUser, setAuthUser] = useState<AuthUserType | null>(null)
+	const [authUser, setAuthUser] = useState<AuthUserType | null>(null);
+	const [isLoading, setLoading] = useState<boolean>(true); // will set to false once authUser set
 
-	const value = {
+	const value: AuthContextType = {
 		authUser,
 		setAuthUser,
+		isLoading,
 	}
 
 	useEffect(() => {
@@ -26,6 +29,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 			const userObj: AuthUserType = JSON.parse(localUser)
 			setAuthUser(userObj)
 		}
+
+		setLoading(false);
 	}, [])
 
 	return (

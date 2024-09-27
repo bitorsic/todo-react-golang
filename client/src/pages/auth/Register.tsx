@@ -20,8 +20,10 @@ const Register: React.FC = () => {
 		last_name: "",
 		password: "",
 	});
-	const navigate = useNavigate()
-	const { apiReq } = useAxios()
+	const navigate = useNavigate();
+	const { apiReq } = useAxios();
+
+	const [isLoading, setLoading] = useState<boolean>(false);
 
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const { name, value } = e.target;
@@ -34,18 +36,25 @@ const Register: React.FC = () => {
 	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
 
+		setLoading(true);
+
 		const response = await apiReq<unknown, FormData>("post", "/api/register", formData)
 
 		if (response) {
-			alert("Registration Successful")
-			navigate("/login")
+			alert("Registration Successful");
+			navigate("/login");
 		}
+
+		setLoading(false);
 	};
 
 	return (
 		<Section>
 			<Box title="Create an account">
-				<AuthForm submitHandler={handleSubmit} buttonText="Register">
+				<AuthForm
+				submitHandler={handleSubmit}
+				isLoading={isLoading}
+				buttonText="Register">
 					<FormInput
 						id="email"
 						label="Your email"

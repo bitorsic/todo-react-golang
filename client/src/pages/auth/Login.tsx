@@ -20,8 +20,10 @@ const Login: React.FC = () => {
 		password: "",
 		device_id: "",
 	});
-	const { setAuthUser } = useAuth()
-	const { apiReq } = useAxios()
+	const { setAuthUser } = useAuth();
+	const { apiReq } = useAxios();
+
+	const [isLoading, setLoading] = useState<boolean>(false);
 
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const { name, value } = e.target;
@@ -34,20 +36,27 @@ const Login: React.FC = () => {
 	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
 
+		setLoading(true);
+
 		const response = await apiReq<AuthUserType, FormData>("post", "/api/login", formData)
 
 		if (response) {
-			const obj = response.data
+			const obj = response.data;
 
-			setAuthUser(obj)
-			localStorage.setItem("authUser", JSON.stringify(obj))
+			setAuthUser(obj);
+			localStorage.setItem("authUser", JSON.stringify(obj));
 		}
+
+		setLoading(false);
 	};
 
 	return (
 		<Section>
 			<Box title="Login">
-				<AuthForm submitHandler={handleSubmit} buttonText="Log in">
+				<AuthForm
+				submitHandler={handleSubmit}
+				isLoading={isLoading}
+				buttonText="Log in">
 					<FormInput
 						id="email"
 						label="Your email"
