@@ -26,3 +26,6 @@ go.work.sum
 
 # executable
 app
+
+# Ignore debug files with specific naming patterns
+__debug*

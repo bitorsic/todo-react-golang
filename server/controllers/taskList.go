@@ -35,6 +35,25 @@ func GetTaskLists(c *fiber.Ctx) error {
 		})
 	}
 
+	// decrypt all tasklists' title and content
+	for iTaskList, taskList := range result {
+		result[iTaskList].Title, err = utils.AESDecrypt(taskList.Title)
+		if err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"error": "error while decrypting tasklist title:\n" + err.Error(),
+			})
+		}
+
+		for iTask, task := range taskList.Tasks {
+			result[iTaskList].Tasks[iTask].Content, err = utils.AESDecrypt(task.Content)
+			if err != nil {
+				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+					"error": "error while decrypting task content:\n" + err.Error(),
+				})
+			}
+		}
+	}
+
 	return c.Status(fiber.StatusOK).JSON(
 		result,
 	)

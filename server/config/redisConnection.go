@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/redis/go-redis/v9"
 )
@@ -19,7 +20,10 @@ func RedisConnect() {
 
 	RedisClient = redis.NewClient(opt)
 
-	_, err = RedisClient.Ping(context.Background()).Result()
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	_, err = RedisClient.Ping(ctx).Result()
 	if err != nil {
 		panic(err)
 	}

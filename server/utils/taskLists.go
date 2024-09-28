@@ -27,6 +27,13 @@ func CreateTaskList(email string, title string, c context.Context) (*models.Task
 		return nil, err
 	}
 
+	// encrypt title
+	taskList.Title, err = AESEncrypt(taskList.Title)
+	if err != nil {
+		err = errors.New("error while encrypting title:\n" + err.Error())
+		return nil, err
+	}
+
 	// saving the tasklist to DB
 	result, err := taskLists.InsertOne(c, taskList)
 	if err != nil {

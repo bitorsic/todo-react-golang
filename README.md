@@ -56,6 +56,7 @@ Task-inator 3000 is a simple and efficient task management application that allo
      REDIS_URL="redis://localhost:6379"
      AUTH_TOKEN_KEY="some_key_you_can_use"
      REFRESH_TOKEN_KEY="another_key"
+     AES_KEY="passphrasewhichneedstobe32bytes!"
      FRONTEND_URL="http://localhost:5173"
      ```
 

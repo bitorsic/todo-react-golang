@@ -3,6 +3,7 @@ package controllers
 import (
 	"task-inator3000/config"
 	"task-inator3000/models"
+	"task-inator3000/utils"
 
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
@@ -34,6 +35,14 @@ func AddTask(c *fiber.Ctx) error {
 	err = task.Validate()
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	// encrypt content
+	task.Content, err = utils.AESEncrypt(task.Content)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": err.Error(),
 		})
 	}
