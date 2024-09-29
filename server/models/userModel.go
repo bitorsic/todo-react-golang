@@ -2,7 +2,7 @@ package models
 
 import (
 	"errors"
-	"regexp"
+	"net/mail"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -20,9 +20,8 @@ func (u *User) Validate() error {
 		return errors.New("email cannot be empty")
 	}
 
-	re := regexp.MustCompile(`^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$`)
-
-	if !re.MatchString(u.Email) {
+	_, err := mail.ParseAddress(u.Email)
+	if err != nil {
 		return errors.New("email invalid")
 	}
 

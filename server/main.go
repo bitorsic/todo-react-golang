@@ -9,11 +9,17 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func main() {
-	godotenv.Load()
+func init() {
+	err := godotenv.Load()
+	if err != nil {
+		panic(err)
+	}
+
 	config.DBConnect()
 	config.RedisConnect()
+}
 
+func main() {
 	app := fiber.New()
 
 	routes.Setup(app)

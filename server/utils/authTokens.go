@@ -13,12 +13,10 @@ func CreateJWT(email string, isRefresh bool) (string, error) {
 	var duration time.Duration
 	if isRefresh {
 		key = os.Getenv("REFRESH_TOKEN_KEY")
-		duration = time.Hour * 24 * 30 // 1 month
-		// duration = time.Second * 30 // TESTING ONLY
+		duration = RefreshTokenExp
 	} else {
 		key = os.Getenv("AUTH_TOKEN_KEY")
-		duration = time.Minute * 10
-		// duration = time.Second * 5 // TESTING ONLY
+		duration = AuthTokenExp
 	}
 
 	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
