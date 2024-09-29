@@ -43,7 +43,9 @@ func Setup(app *fiber.App) {
 	// tasklists
 	tasks.Get("/", controllers.GetTaskLists)
 	tasks.Post("/", controllers.AddTaskList)
+	tasks.Delete("/list/:taskListID", controllers.DeleteTaskList)
 
 	// tasks
 	tasks.Post("/:taskListID", controllers.AddTask)
+	tasks.Delete("/:taskID", controllers.DeleteTask)
 }

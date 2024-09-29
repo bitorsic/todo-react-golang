@@ -11,8 +11,8 @@ type Task struct {
 	Content string             `bson:"content" json:"content"`
 }
 
-func (tl *Task) Validate() error {
-	if tl.Content == "" {
+func (t *Task) Validate() error {
+	if t.Content == "" {
 		return errors.New("content cannot be empty")
 	}
 

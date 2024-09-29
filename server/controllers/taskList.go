@@ -7,6 +7,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
@@ -68,7 +69,6 @@ func AddTaskList(c *fiber.Ctx) error {
 
 	var input Input
 
-	// parsing req body to user
 	err := c.BodyParser(&input)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -76,14 +76,45 @@ func AddTaskList(c *fiber.Ctx) error {
 		})
 	}
 
-	taskList, err := utils.CreateTaskList(email, input.Title, c.Context())
+	taskListID, err := utils.CreateTaskList(email, input.Title, c.Context())
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": err.Error(),
 		})
 	}
 
-	return c.Status(fiber.StatusOK).JSON(
-		*taskList,
-	)
+	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
+		"taskListID": taskListID,
+	})
+}
+
+func DeleteTaskList(c *fiber.Ctx) error {
+	taskLists := config.DB.Collection("task_lists")
+
+	// Convert the param taskListID from string to ObjectID
+	taskListID, err := primitive.ObjectIDFromHex(c.Params("taskListID"))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "invalid tasklist id",
+		})
+	}
+
+	filter := bson.M{
+		"_id":   taskListID,
+		"owner": c.Locals("email"),
+	}
+	result, err := taskLists.DeleteOne(c.Context(), filter)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	if result.DeletedCount == 0 {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"error": "tasklist not found / permission denied",
+		})
+	}
+
+	return c.SendStatus(fiber.StatusNoContent)
 }

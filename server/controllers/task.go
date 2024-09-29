@@ -75,3 +75,40 @@ func AddTask(c *fiber.Ctx) error {
 		"taskID": task.ID,
 	})
 }
+
+func DeleteTask(c *fiber.Ctx) error {
+	taskLists := config.DB.Collection("task_lists")
+
+	// Convert the param taskID from string to ObjectID
+	taskID, err := primitive.ObjectIDFromHex(c.Params("taskID"))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "invalid task id",
+		})
+	}
+
+	// update the task list by removing the task with the given taskID
+	filter := bson.M{
+		"tasks._id": taskID,
+		"owner":     c.Locals("email"),
+	}
+	update := bson.M{
+		"$pull": bson.M{
+			"tasks": bson.M{"_id": taskID},
+		},
+	}
+	result, err := taskLists.UpdateOne(c.Context(), filter, update)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	if result.MatchedCount == 0 {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"error": "task not found / permission denied",
+		})
+	}
+
+	return c.SendStatus(fiber.StatusNoContent)
+}
