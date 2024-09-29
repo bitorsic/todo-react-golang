@@ -10,10 +10,7 @@ import (
 )
 
 func init() {
-	err := godotenv.Load()
-	if err != nil {
-		panic(err)
-	}
+	godotenv.Load()
 
 	config.DBConnect()
 	config.RedisConnect()
