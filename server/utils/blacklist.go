@@ -10,11 +10,9 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-var keyPrefix string = "blacklisted:"
-
 func AddToBlacklist(token string, c context.Context) error {
-	key := keyPrefix + token
-	expiry := time.Hour * 24 * 30 // 1 month
+	key := blacklistKeyPrefix + token
+	expiry := refreshTokenExp
 
 	// defining the value for the key
 	dataMap := map[string]interface{}{
@@ -35,7 +33,7 @@ func AddToBlacklist(token string, c context.Context) error {
 }
 
 func IsBlacklisted(token string, c context.Context) (bool, error) {
-	key := keyPrefix + token
+	key := blacklistKeyPrefix + token
 
 	_, err := config.RedisClient.Get(c, key).Result()
 	if err != nil {
