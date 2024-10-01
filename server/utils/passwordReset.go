@@ -3,11 +3,14 @@ package utils
 import (
 	"context"
 	"crypto/rand"
+	"errors"
 	"fmt"
 	"math/big"
 	"os"
 	"task-inator3000/config"
 
+	"github.com/redis/go-redis/v9"
+	"go.mongodb.org/mongo-driver/bson"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -72,6 +75,56 @@ func SendOTP(otp string, recipient string) error {
 
 	// close and send email
 	err = writeCloser.Close()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func VerifyOTP(otp string, email string, c context.Context) (error, bool) {
+	key := otpKeyPrefix + email
+
+	// get the value for the key
+	value, err := config.RedisClient.Get(c, key).Result()
+	if err != nil {
+		// the following states that the key was not found
+		if err == redis.Nil {
+			return errors.New("otp expired / incorrect email"), false
+		}
+
+		// for other errors
+		return err, true
+	}
+
+	// compare received otp's hash with value in redis
+	err = bcrypt.CompareHashAndPassword([]byte(value), []byte(otp))
+	if err != nil {
+		return errors.New("incorrect otp"), false
+	}
+
+	// delete redis key to prevent abuse of otp
+	err = config.RedisClient.Del(c, key).Err()
+	if err != nil {
+		return err, true
+	}
+
+	return nil, false
+}
+
+func UpdatePassword(email string, password string, c context.Context) error {
+	users := config.DB.Collection("users")
+
+	// hash the password
+	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(password), 10)
+
+	// update the password
+	update := bson.M{
+		"$set": bson.M{
+			"password": hashedPassword,
+		},
+	}
+	_, err := users.UpdateByID(c, email, update)
 	if err != nil {
 		return err
 	}

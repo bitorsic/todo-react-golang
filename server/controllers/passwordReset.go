@@ -58,3 +58,51 @@ func SendPasswordResetEmail(c *fiber.Ctx) error {
 
 	return c.SendStatus(fiber.StatusNoContent)
 }
+
+func ResetPassword(c *fiber.Ctx) error {
+	type Input struct {
+		OTP         string `json:"otp"`
+		Email       string `json:"email"`
+		NewPassword string `json:"new_password"`
+	}
+
+	var input Input
+
+	err := c.BodyParser(&input)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "invalid data",
+		})
+	}
+
+	// no input field should be empty
+	if input.OTP == "" || input.Email == "" || input.NewPassword == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "invalid data",
+		})
+	}
+
+	// check redis for otp
+	err, isInternalErr := utils.VerifyOTP(input.OTP, input.Email, c.Context())
+	if err != nil {
+		var code int
+		if isInternalErr {
+			code = fiber.StatusInternalServerError
+		} else {
+			code = fiber.StatusUnauthorized
+		}
+
+		return c.Status(code).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	err = utils.UpdatePassword(input.Email, input.NewPassword, c.Context())
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	return c.SendStatus(fiber.StatusNoContent)
+}

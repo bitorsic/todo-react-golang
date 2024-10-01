@@ -35,7 +35,8 @@ func Setup(app *fiber.App) {
 	api.Delete("/logout", controllers.Logout)
 
 	// password reset
-	api.Post("/send-otp", controllers.SendPasswordResetEmail)
+	api.Post("/reset-password", controllers.SendPasswordResetEmail)
+	api.Put("/reset-password", controllers.ResetPassword)
 
 	// routes below this need to be protected so using the auth middleware now
 	api.Use(middleware.VerifyAuthToken)

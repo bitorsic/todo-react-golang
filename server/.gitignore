@@ -29,3 +29,6 @@ app
 
 # Ignore debug files with specific naming patterns
 __debug*
+
+# Redis dump
+dump.rdb
