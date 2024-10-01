@@ -2,7 +2,6 @@ package config
 
 import (
 	"crypto/tls"
-	"fmt"
 	"net/smtp"
 	"os"
 )
@@ -27,11 +26,9 @@ func SMTPConnect() {
 	client = nil
 
 	// initiate TLS handshake
-	if ok, _ := SMTPClient.Extension("STARTTLS"); ok {
-		config := &tls.Config{ServerName: host}
-		if err = SMTPClient.StartTLS(config); err != nil {
-			panic(err)
-		}
+	err = SMTPClient.StartTLS(&tls.Config{ServerName: host})
+	if err != nil {
+		panic(err)
 	}
 
 	// authenticate
@@ -39,6 +36,4 @@ func SMTPConnect() {
 	if err != nil {
 		panic(err)
 	}
-
-	fmt.Println("SMTP Connected")
 }

@@ -14,7 +14,6 @@ func init() {
 
 	config.DBConnect()
 	config.RedisConnect()
-	config.SMTPConnect()
 }
 
 func main() {

@@ -7,23 +7,23 @@ import { useAuth } from "../../hooks/useAuth";
 import { AuthUserType } from "../../contexts/AuthContext";
 import Section from "../../components/Section";
 import { useAxios } from "../../hooks/useAxios";
+import PasswordResetModal from "../../components/PasswordResetModal";
 
 interface FormData {
 	email: string,
 	password: string,
-	device_id: string,
 }
 
 const Login: React.FC = () => {
 	const [formData, setFormData] = useState<FormData>({
 		email: "",
 		password: "",
-		device_id: "",
 	});
 	const { setAuthUser } = useAuth();
 	const { apiReq } = useAxios();
 
 	const [isLoading, setLoading] = useState<boolean>(false);
+	const [showModal, setShowModal] = useState<boolean>(false);
 
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const { name, value } = e.target;
@@ -54,9 +54,9 @@ const Login: React.FC = () => {
 		<Section>
 			<Box title="Login">
 				<AuthForm
-				submitHandler={handleSubmit}
-				isLoading={isLoading}
-				buttonText="Log in">
+					submitHandler={handleSubmit}
+					isLoading={isLoading}
+					buttonText="Log in">
 					<FormInput
 						id="email"
 						label="Your email"
@@ -72,14 +72,24 @@ const Login: React.FC = () => {
 						changeHandler={handleChange}
 						isRequired />
 				</AuthForm>
-				<p className="text-sm font-light text-gray-500 dark:text-gray-400">
-					Don't have an account?{" "}
-					<Link to={"/register"}>
-						<button className="font-medium text-primary-600 hover:underline dark:text-primary-500">
-							Register here
-						</button>
-					</Link>
-				</p>
+				<div className="grid grid-flow-col">
+					<p className="text-sm font-light text-gray-500 dark:text-gray-400 pr-2">
+						Don't have an account?{" "}
+						<Link to={"/register"}>
+							<button className="font-medium text-primary-600 hover:underline dark:text-primary-500">
+								Register here
+							</button>
+						</Link>
+					</p>
+					<button 
+					type="button"
+					onClick={() => setShowModal(true)}
+					className="text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-3 py-2 text-center me-2 mb-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:focus:ring-blue-800">
+						Forgot Password?
+					</button>
+
+					<PasswordResetModal isVisible={showModal} onClose={() => setShowModal(false)} />
+				</div>
 			</Box>
 		</Section>
 	)

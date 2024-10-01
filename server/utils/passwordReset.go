@@ -43,6 +43,9 @@ func AddOTPtoRedis(otp string, email string, c context.Context) error {
 }
 
 func SendOTP(otp string, recipient string) error {
+	// connecting here because connection tends to time out
+	config.SMTPConnect()
+
 	sender := os.Getenv("SMTP_EMAIL")
 	client := config.SMTPClient
 
@@ -75,6 +78,12 @@ func SendOTP(otp string, recipient string) error {
 
 	// close and send email
 	err = writeCloser.Close()
+	if err != nil {
+		return err
+	}
+
+	// close smtp connection
+	err = client.Close()
 	if err != nil {
 		return err
 	}
