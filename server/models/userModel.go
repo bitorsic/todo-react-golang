@@ -3,16 +3,13 @@ package models
 import (
 	"errors"
 	"net/mail"
-
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type User struct {
-	Email     string               `bson:"_id" json:"email"`
-	FirstName string               `bson:"first_name" json:"first_name"`
-	LastName  string               `bson:"last_name,omitempty" json:"last_name"`
-	Password  string               `bson:"password" json:"password"`
-	TaskLists []primitive.ObjectID `bson:"task_lists,omitempty" json:"task_lists"`
+	Email     string `bson:"_id" json:"email"`
+	FirstName string `bson:"first_name" json:"first_name"`
+	LastName  string `bson:"last_name,omitempty" json:"last_name"`
+	Password  string `bson:"password" json:"password"`
 }
 
 func (u *User) Validate() error {
